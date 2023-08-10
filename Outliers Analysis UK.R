@@ -1,33 +1,37 @@
-library.path <- .libPaths("C:/Users/steph/Documents/R/win-library/4.0")
-source("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Pipeline\\Code\\OutsideBorders.R")
-source("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\code\\ThresholdingAlgo.R")
+cat("UK Outlier Analysis Start\n")
+renv::activate()
+
+#renv::restore(packages = "renv")
+
+#.libPaths()
+
+#Declaring variables for directories change
+path_var <- Sys.getenv("path_code_outlier")
+path_var_csv <- gsub("Code","csv",path_var)
+path_var_output <- gsub("Code","Output",path_var)
+
+#Calling outside scripts
+source(paste0(path_var,"OutsideBorders.R"))
+source(paste0(path_var,"ThresholdingAlgo.R"))
+
+#source("C:\\Users\\snichanian\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Pipeline\\Code\\OutsideBorders.R")
+#source("C:\\Users\\snichanian\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\code\\ThresholdingAlgo.R")
 
 oldw <- getOption("warn")
 options(warn = -1)
 
 suppressMessages({
   
-  library(tidyverse, lib.loc = library.path)
-  library(stringr, lib.loc = library.path)
-  library(reshape2, lib.loc = library.path)
-  library(ggthemes, lib.loc = library.path)
-  library(gridExtra, lib.loc = library.path)
-  library(forecast, lib.loc = library.path)
-  library(aTSA, lib.loc = library.path)
-  library(DescTools, lib.loc = library.path)
-  library(plyr, lib.loc = library.path)
-  library(EnvStats, lib.loc = library.path)
-  library(qcc, lib.loc = library.path)
-  library(openxlsx, lib.loc = library.path)
-  library(magrittr, lib.loc = library.path)
-  library(rstatix, lib.loc = library.path)
-  library(mcp, lib.loc = library.path)
-  library(changepoint, lib.loc = library.path)
+  library(tidyverse)
+  library(stringr)
+  library(reshape2)
+  library(openxlsx)
+  library(magrittr)
+  library(rstatix)
+  
   
 })
 
-
-options(warn = oldw)
 
 options(scipen=999, digits = 3 )
 
@@ -37,13 +41,15 @@ all_days <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sun
 
 
 #Setting the directory where all files will be used from for this project
-setwd("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\csv")
+setwd(path_var_csv)
+#setwd("C:\\Users\\snichanian\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\csv")
 
 #Importing and clean Sales Data
 Sales_UK <- read.csv("UK_AA_Data.csv", header = T, stringsAsFactors = FALSE)
 Sales_UK$AA.Reason.Code <- gsub("Core title", "Core Title", Sales_UK$AA.Reason.Code)
 
-setwd("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\Output")
+setwd(path_var_output)
+#setwd("C:\\Users\\snichanian\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\Output")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -193,7 +199,8 @@ Sales_UKA_outliers <-
   group_by(ISBN) %>% 
   filter(!(is.outlier=="LOW" & n() > 1)) %>%
   as.data.frame() %>% 
-  mutate(across(13:14, round, 3)) %>% 
+  mutate( CPC = round(CPC,3),
+          CVR = round(CVR,3) ) %>%   #mutate(across(13:14, round, 3)) %>%
   arrange(AA.Reason.Code, is.outlier)
 
 Sales_UKB_outliers <- 
@@ -208,7 +215,8 @@ Sales_UKB_outliers <-
   group_by(ISBN) %>% 
   filter(!(is.outlier=="LOW" & n() > 1)) %>% 
   as.data.frame() %>% 
-  mutate(across(13:14, round, 3)) %>% 
+  mutate( CPC = round(CPC,3),
+          CVR = round(CVR,3) ) %>%
   arrange(AA.Reason.Code, is.outlier)
 
 Sales_UKC_outliers <- 
@@ -223,7 +231,8 @@ Sales_UKC_outliers <-
   group_by(ISBN) %>% 
   filter(!(is.outlier=="LOW" & n() > 1)) %>% 
   as.data.frame() %>% 
-  mutate(across(13:14, round, 3)) %>% 
+  mutate( CPC = round(CPC,3),
+          CVR = round(CVR,3) ) %>% 
   arrange(AA.Reason.Code, is.outlier)
 
 Sales_Outliers <- rbind(Sales_UKA_outliers, Sales_UKB_outliers )
@@ -405,3 +414,7 @@ saveWorkbook(wb, paste0("UK Outliers - ",pred_date,".xlsx"), overwrite = T)
 # #saveWorkbook(wb, paste0("AA Spend Analysis COT - ",pred_date,".xlsx"), overwrite = T) 
 # 
 # 
+
+renv::deactivate()
+cat("UK Outlier Analysis End\n\n")
+

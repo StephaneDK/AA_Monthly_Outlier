@@ -1,33 +1,35 @@
-library.path <- .libPaths("C:/Users/steph/Documents/R/win-library/4.0")
-source("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Pipeline\\Code\\OutsideBorders.R")
-source("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\code\\ThresholdingAlgo.R")
+cat("US Outlier Analysis Start\n")
+renv::activate()
+
+#.libPaths()
+
+#Declaring variables for directories change
+path_var <- Sys.getenv("path_code_outlier")
+path_var_csv <- gsub("Code","csv",path_var)
+path_var_output <- gsub("Code","Output",path_var)
+
+#Calling outside scripts
+source(paste0(path_var,"OutsideBorders.R"))
+source(paste0(path_var,"ThresholdingAlgo.R"))
+
+#source("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Pipeline\\Code\\OutsideBorders.R")
+#source("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\code\\ThresholdingAlgo.R")
 
 oldw <- getOption("warn")
 options(warn = -1)
 
 suppressMessages({
   
-  library(tidyverse, lib.loc = library.path)
-  library(stringr, lib.loc = library.path)
-  library(reshape2, lib.loc = library.path)
-  library(ggthemes, lib.loc = library.path)
-  library(gridExtra, lib.loc = library.path)
-  library(forecast, lib.loc = library.path)
-  library(aTSA, lib.loc = library.path)
-  library(DescTools, lib.loc = library.path)
-  library(plyr, lib.loc = library.path)
-  library(EnvStats, lib.loc = library.path)
-  library(qcc, lib.loc = library.path)
-  library(openxlsx, lib.loc = library.path)
-  library(magrittr, lib.loc = library.path)
-  library(rstatix, lib.loc = library.path)
-  library(mcp, lib.loc = library.path)
-  library(changepoint, lib.loc = library.path)
+  library(tidyverse)
+  library(stringr)
+  library(reshape2)
+  library(openxlsx)
+  library(magrittr)
+  library(rstatix)
+  
   
 })
 
-
-options(warn = oldw)
 
 options(scipen=999, digits = 3 )
 
@@ -37,13 +39,15 @@ all_days <- c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sun
 
 
 #Setting the directory where all files will be used from for this project
-setwd("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\csv")
+setwd(path_var_csv)
+#setwd("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\csv")
 
 #Importing and clean Sales Data
 Sales_UK <- read.csv("US_AA_Data.csv", header = T, stringsAsFactors = FALSE)
 Sales_UK$AA.Reason.Code <- gsub("Core title", "Core Title", Sales_UK$AA.Reason.Code)
 
-setwd("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\Output")
+setwd(path_var_output)
+#setwd("C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\Output")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -65,6 +69,7 @@ Sales_UKA <- Sales_UK  %>%
 Sales_UKA <- Sales_UKA %>% 
   mutate(outlier = ifelse(is.outlier=="TRUE" , Title,NA))
 
+
 ggplot(Sales_UKA, aes(x=AA.Reason.Code, y=AA_SPEND)) + 
   geom_boxplot()  +
   ggrepel::geom_text_repel(aes(label=outlier)) +
@@ -73,6 +78,7 @@ ggplot(Sales_UKA, aes(x=AA.Reason.Code, y=AA_SPEND)) +
         plot.title = element_text(hjust = 0.5)) +
   ggtitle("US AA Spend Boxplots Status A") +
   ylab("AA Spend ($)") 
+
 
 ggsave("US AA Spend Boxplots Status A.png",width = 11.4, height = 8.44, dpi = 300)
 
@@ -98,6 +104,7 @@ Sales_UKB <- Sales_UK  %>%
 Sales_UKB <- Sales_UKB %>% 
   mutate(outlier = ifelse(is.outlier=="TRUE" , Title,NA))
 
+
 ggplot(Sales_UKB, aes(x=AA.Reason.Code, y=AA_SPEND)) + 
   geom_boxplot()  +
   ggrepel::geom_text_repel(aes(label=outlier)) +
@@ -106,6 +113,7 @@ ggplot(Sales_UKB, aes(x=AA.Reason.Code, y=AA_SPEND)) +
         plot.title = element_text(hjust = 0.5)) +
   ggtitle("US AA Spend Boxplots Status B") +
   ylab("AA Spend ($)") 
+
 
 ggsave("US AA Spend Boxplots Status B.png",width = 11.4, height = 8.44, dpi = 300)
 
@@ -123,6 +131,7 @@ Sales_UKC_outliers <-
   group_by(AA.Reason.Code ) %>%
   rstatix::identify_outliers(AA_SPEND) %>%
   select(ISBN,is.outlier)
+  
 
 Sales_UKC <- Sales_UK  %>%
   subset(AA.Status %in% c("C") ) %>%
@@ -131,14 +140,16 @@ Sales_UKC <- Sales_UK  %>%
 Sales_UKC <- Sales_UKC %>% 
   mutate(outlier = ifelse(is.outlier=="TRUE" , Title,NA))
 
-ggplot(Sales_UKC, aes(x=AA.Reason.Code, y=AA_SPEND)) + 
+
+  ggplot(Sales_UKC, aes(x=AA.Reason.Code, y=AA_SPEND)) + 
   geom_boxplot()  +
   ggrepel::geom_text_repel(aes(label=outlier)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),  
         axis.title.x = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
   ggtitle("US AA Spend Boxplots Status C") +
-  ylab("AA Spend ($)") 
+  ylab("AA Spend ($)")
+
 
 ggsave("US AA Spend Boxplots Status C.png",width = 11.4, height = 8.44, dpi = 300)
 
@@ -199,8 +210,10 @@ Sales_UKA_outliers <-
   group_by(ISBN) %>% 
   filter(!(is.outlier=="LOW" & n() > 1)) %>%
   as.data.frame() %>% 
-  mutate(across(13:14, round, 3)) %>% 
+  mutate( CPC = round(CPC,3),
+          CVR = round(CVR,3) ) %>% 
   arrange(AA.Reason.Code, is.outlier)
+
 
 Sales_UKB_outliers <- 
   Sales_UK  %>%
@@ -214,7 +227,8 @@ Sales_UKB_outliers <-
   group_by(ISBN) %>% 
   filter(!(is.outlier=="LOW" & n() > 1)) %>% 
   as.data.frame() %>% 
-  mutate(across(13:14, round, 3)) %>% 
+  mutate( CPC = round(CPC,3),
+          CVR = round(CVR,3) ) %>% 
   arrange(AA.Reason.Code, is.outlier)
 
 Sales_UKC_outliers <- 
@@ -229,7 +243,8 @@ Sales_UKC_outliers <-
   group_by(ISBN) %>% 
   filter(!(is.outlier=="LOW" & n() > 1)) %>% 
   as.data.frame() %>% 
-  mutate(across(13:14, round, 3)) %>% 
+  mutate( CPC = round(CPC,3),
+          CVR = round(CVR,3) ) %>% 
   arrange(AA.Reason.Code, is.outlier)
 
 Sales_Outliers <- rbind(Sales_UKA_outliers, Sales_UKB_outliers )
@@ -416,118 +431,6 @@ saveWorkbook(wb, paste0("US Outliers - ",pred_date,".xlsx"), overwrite = T)
 # #saveWorkbook(wb, paste0("AA Spend Analysis COT US - ",pred_date,".xlsx"), overwrite = T) 
 # 
 # 
-# 
-# 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 
-# View(Sales_UK)
-# Sales_UKA <- Sales_UK  %>%
-#   subset(AA.Status %in% c("A") ) 
-# 
-# Sales_UKB <- Sales_UK  %>%
-#   subset(AA.Status %in% c("B") ) 
-# 
-# Sales_UKC <- Sales_UK  %>%
-#   subset(AA.Status %in% c("C") ) 
-# 
-# #Creating regression model of spend vs sales
-# model_A <- lm(AA_SALES ~ AA_SPEND, data = Sales_UKA)
-# 
-# #Creating regression model of spend vs sales
-# model_B <- lm(AA_SALES ~ AA_SPEND, data = Sales_UKB)
-# 
-# #Creating regression model of spend vs sales
-# model_C <- lm(AA_SALES ~ AA_SPEND, data = Sales_UKC)
-# 
-# summary(model_A)
-# summary(model_B)
-# summary(model_C)
-# 
-# #Plotting residuals
-# par(mfrow = c(2, 2))
-# plot(model_SS)
-# 
-# View(Sales_UK[c(1008,1072,1077),])
-# 
-# #Calculating outliers with Cook's distance
-# cooks_outliers <- cooks.distance(model_A)
-# OutliersA <- cooks_outliers[(cooks_outliers > 1)]
-# OutliersA
-# 
-# #Calculating outliers with Cook's distance
-# cooks_outliers <- cooks.distance(model_B)
-# OutliersB <- cooks_outliers[(cooks_outliers > 1)]
-# OutliersB
-# 
-# View(Sales_UK[c(1077),])
-# 
-# 
-# #Calculating outliers with Cook's distance
-# cooks_outliers <- cooks.distance(model_C)
-# OutliersC <- cooks_outliers[(cooks_outliers > 1)]
-# OutliersC
-# 
-# View(Sales_UK[c(1064,1067),])
-# 
-# 
-# 
-# 
-# 
-# 
-# #Boxplot
-# is_outlier <- function(x) {
-#   return(x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 4 * IQR(x))
-# }
-# 
-# Sales_UK2 <- Sales_UK  %>%
-#   subset(AA.Status %in% c("A", "B", "C") )  %>%
-#   group_by(AA.Reason.Code) %>%
-#   mutate(outlier = ifelse(is_outlier(AA_SPEND), Title, as.numeric(NA)))
-# 
-# View(Sales_UK2)
-# 
-# ggplot(Sales_UK2, aes(x=AA.Reason.Code, y=AA_SPEND)) + 
-#   geom_boxplot()  +
-#   geom_text(aes(label=outlier), na.rm=TRUE, vjust=-.9,
-#             position=position_jitter(width=0,height=-1)) +
-#   facet_wrap(~AA.Status) + 
-#   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),  
-#         axis.title.x = element_blank(),
-#         plot.title = element_text(hjust = 0.5)) +
-#   ggtitle("UK AA Spend Boxplots") +
-#   ylab("AA Spend (£)") 
-# 
-# 
-# #Standard deviations
-# aggregate(AA_SPEND ~ AA.Status, Sales_UK2, function(x) c(count = length(x) ,sum = sum(x) ,mean = mean(x), median = median(x) , sd = sd(x)))
-# 
-# 
-
+renv::deactivate()
+cat("US Outlier Analysis End\n\n")

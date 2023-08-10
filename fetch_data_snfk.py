@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Apr  6 10:33:22 2021
-
-@author: Becky
-"""
 
 from __future__ import print_function
 import os
 import sys
 
+path_python_outlier = os.environ["path_code_outlier"].replace("Code","csv")
+path_python_roas = os.environ["path_code_ROAS"].replace("Code","csv")
 
-os.chdir('C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\csv')
+os.chdir(path_python_outlier)
 
 class LatestDataCheck(Exception):
     pass
@@ -21,7 +18,6 @@ from datetime import timedelta
 today = date.today()
 last_saturday = today - timedelta(days= (today.weekday() - 5) % 7)
 last_saturday = last_saturday.strftime('%Y-%m-%d')
-#last_saturday = '2022-02-19' 
 
 
 #Connecting to DB --------------------------------------------------------------------------------------------------------------------
@@ -162,14 +158,7 @@ def connect():
             file.writerows(record) 
             print('Latest US AA Data Saved \n')
 
-
-
-
-
-
-
-
-        #Getting ROAS Data for Change Over Time
+#Getting ROAS Data for Change Over Time
         sql_context = """
         with camp_uk as (
         select  'UK' as "REGION", *,  "sales"/nullifzero("spend") as ROAS 
@@ -236,7 +225,7 @@ def connect():
             print('No Print Status')
             raise LatestDataCheck()
 
-        os.chdir('C:\\Users\\steph\\Documents\\DK\\Work\\Forecasting book sales and inventory\\Auxilary tasks\\Amazon Advertisment\\ROAS Analysis\\csv')
+        os.chdir(path_python_roas)
 
         #Writing csv file
         with open('ROAS_data.csv', 'w') as f:
@@ -262,6 +251,7 @@ def connect():
 
 if __name__ == '__main__':
     connect()
+
 
 
 
