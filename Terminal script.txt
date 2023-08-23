@@ -1,0 +1,7 @@
+Run Pipeline
+source "C:\Users\steph\Documents\DK\Work\Forecasting book sales and inventory\Auxilary tasks\Amazon Advertisment\Code\Pipeline.sh"
+source "C:\Users\snichanian\Documents\DK\Work\Forecasting book sales and inventory\Auxilary tasks\Amazon Advertisment\Code\Pipeline.sh"
+
+Git:
+cd "C:\Users\steph\Documents\DK\Work\Forecasting book sales and inventory\Auxilary tasks\Amazon Advertisment\Code"
+cd "C:\Users\snichanian\Documents\DK\Work\Forecasting book sales and inventory\Auxilary tasks\Amazon Advertisment\Code"

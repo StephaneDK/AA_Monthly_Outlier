@@ -1,5 +1,9 @@
 #!/bin/sh
 
+source "C:\Users\steph\miniconda3\etc\profile.d\conda.sh"
+#source "C:\Users\snichanian\miniconda3\etc\profile.d\conda.sh"
+conda activate Outlier_env
+
 #Outliers Analysis path
 path_local_outlier='C:\Users\steph\Documents\DK\Work\Forecasting book sales and inventory\Auxilary tasks\Amazon Advertisment\Code\'
 path_DK_outlier='C:\Users\snichanian\Documents\DK\Work\Forecasting book sales and inventory\Auxilary tasks\Amazon Advertisment\Code\'
@@ -22,15 +26,11 @@ python "fetch_data_snfk.py"
 Rscript "Outliers Analysis US.R" 
 Rscript "Outliers Analysis UK.R" 
 
-
-
-
-
 cd "$path_code_ROAS"
 
 Rscript "Roas Analysis - UK.R" 
 Rscript "Roas Analysis - US.R" 
 
 
-
+conda deactivate
 
